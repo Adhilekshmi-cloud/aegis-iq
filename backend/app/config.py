@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +12,10 @@ DEFAULT_DATABASE_URL = (
     if os.name != "nt"
     else f"sqlite+aiosqlite:///{(Path(__file__).resolve().parents[1] / 'aegis_knowledge.db').as_posix()}"
 )
+
+DEFAULT_DATA_DIR = (
+    Path(__file__).resolve().parents[2] / "data" / "aegis-dataset"
+).as_posix()
 
 
 class Settings(BaseSettings):
@@ -26,23 +30,34 @@ class Settings(BaseSettings):
     APP_NAME: str = "Aegis Knowledge System"
     APP_VERSION: str = "1.0.0"
     PROJECT_NAME: str = "Aegis Knowledge System"
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = "/api"
     DEBUG: bool = False
+
+    # LLM & Embedding configuration
+    OPENAI_API_KEY: str = ""
+    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     # Database
     DATABASE_URL: str = DEFAULT_DATABASE_URL
 
+    # Storage and paths
+    DATA_DIR: str = DEFAULT_DATA_DIR
+    LOG_LEVEL: str = "INFO"
+    FAISS_INDEX_PATH: str = "./faiss_index"
+
     # CORS
-    # Set this in Render as a plain string, e.g.:
-    # https://your-frontend-name.onrender.com
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: Union[str, List[str]] = "http://localhost:5173"
 
     @property
     def cors_origins(self) -> List[str]:
-        value = self.CORS_ORIGINS.strip()
+        if isinstance(self.CORS_ORIGINS, list):
+            return self.CORS_ORIGINS
 
+        value = str(self.CORS_ORIGINS).strip()
         if not value:
-            return []
+            return ["*"]
 
         # Accept JSON array format, e.g. ["https://example.com"]
         if value.startswith("["):
