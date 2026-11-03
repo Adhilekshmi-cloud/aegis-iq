@@ -2,10 +2,13 @@
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.api.routes import api_router
 from app.config import settings
@@ -57,18 +60,6 @@ app.add_middleware(
 app.include_router(api_router)
 
 
-@app.get("/", tags=["System"])
-async def root() -> Dict[str, str]:
-    """Root endpoint returning system metadata and available documentation links."""
-    return {
-        "name": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "status": "online",
-        "docs_url": "/docs",
-        "redoc_url": "/redoc",
-    }
-
-
 @app.get("/health", tags=["System"])
 async def health_check() -> Dict[str, str]:
     """Health check endpoint to verify system operability."""
@@ -78,6 +69,30 @@ async def health_check() -> Dict[str, str]:
         "version": settings.APP_VERSION,
         "database": "connected",
     }
+
+
+# Mount Frontend Built Static Files directly if present
+frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+    logger.info("Mounting frontend build from %s", frontend_dist)
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+
+    @app.get("/{full_path:path}", tags=["Frontend"])
+    async def serve_frontend(full_path: str):
+        file_path = frontend_dist / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(frontend_dist / "index.html"))
+else:
+    @app.get("/", tags=["System"])
+    async def root() -> Dict[str, str]:
+        return {
+            "name": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+            "status": "online",
+            "docs_url": "/docs",
+            "redoc_url": "/redoc",
+        }
 
 
 if __name__ == "__main__":
