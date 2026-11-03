@@ -1,7 +1,17 @@
 import json
+import os
+from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# Use a Windows-compatible database path locally and /tmp on Linux (Render).
+DEFAULT_DATABASE_URL = (
+    "sqlite+aiosqlite:////tmp/aegis_knowledge.db"
+    if os.name != "nt"
+    else f"sqlite+aiosqlite:///{(Path(__file__).resolve().parents[1] / 'aegis_knowledge.db').as_posix()}"
+)
 
 
 class Settings(BaseSettings):
@@ -13,13 +23,18 @@ class Settings(BaseSettings):
     )
 
     # Application
+    APP_NAME: str = "Aegis Knowledge System"
+    APP_VERSION: str = "1.0.0"
     PROJECT_NAME: str = "Aegis Knowledge System"
     API_V1_STR: str = "/api/v1"
+    DEBUG: bool = False
 
     # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:////tmp/aegis_knowledge.db"
+    DATABASE_URL: str = DEFAULT_DATABASE_URL
 
-    # CORS: supply as a plain string in Render
+    # CORS
+    # Set this in Render as a plain string, e.g.:
+    # https://your-frontend-name.onrender.com
     CORS_ORIGINS: str = "http://localhost:5173"
 
     @property
@@ -29,7 +44,7 @@ class Settings(BaseSettings):
         if not value:
             return []
 
-        # Accept JSON array format
+        # Accept JSON array format, e.g. ["https://example.com"]
         if value.startswith("["):
             try:
                 parsed = json.loads(value)

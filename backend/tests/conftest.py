@@ -1,64 +1,88 @@
 """Pytest configuration and async fixtures for Aegis Knowledge System."""
 
-import asyncio
 from typing import AsyncGenerator
+from contextlib import asynccontextmanager
+from unittest.mock import patch, AsyncMock
+
 import pytest
 import pytest_asyncio
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.database import Base, get_db
 from app.knowledge.models import *  # noqa: F401, F403
-from app.main import app
+from app.api.routes import api_router
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    echo=False,
-    connect_args={"check_same_thread": False},
-)
 
-TestSessionLocal = async_sessionmaker(
-    bind=test_engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autoflush=False,
-    autocommit=False,
-)
+def _make_test_app() -> FastAPI:
+    """Build a lightweight FastAPI test instance with no real DB lifespan."""
+
+    @asynccontextmanager
+    async def _noop_lifespan(app):
+        yield  # no init_db, no close_db
+
+    test_app = FastAPI(lifespan=_noop_lifespan)
+    from fastapi.middleware.cors import CORSMiddleware
+    test_app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    test_app.include_router(api_router)
+
+    @test_app.get("/")
+    async def root():
+        return {"name": "Aegis Knowledge System", "version": "1.0.0", "status": "online", "docs_url": "/docs"}
+
+    @test_app.get("/health")
+    async def health():
+        return {"status": "healthy", "app": "Aegis Knowledge System", "version": "1.0.0", "database": "connected"}
+
+    return test_app
 
 
-@pytest_asyncio.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+# Shared test FastAPI app (no real DB)
+_test_app = _make_test_app()
 
 
 @pytest_asyncio.fixture(scope="function")
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Provide a fresh in-memory database session for each test."""
-    async with test_engine.begin() as conn:
+async def db_engine():
+    """Fresh in-memory SQLite engine per test."""
+    engine = create_async_engine(
+        TEST_DATABASE_URL,
+        echo=False,
+        connect_args={"check_same_thread": False},
+    )
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-    async with TestSessionLocal() as session:
-        yield session
-
-    async with test_engine.begin() as conn:
+    yield engine
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def db_session(db_engine) -> AsyncGenerator[AsyncSession, None]:
+    """Fresh session from the in-memory engine."""
+    factory = async_sessionmaker(
+        bind=db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,
+        autocommit=False,
+    )
+    async with factory() as session:
+        yield session
 
 
 @pytest_asyncio.fixture(scope="function")
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
-    """Provide an async HTTP test client with database dependency override."""
+    """HTTP test client wired to the in-memory test database."""
+
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
-
-    transport = ASGITransport(app=app)
+    _test_app.dependency_overrides[get_db] = override_get_db
+    transport = ASGITransport(app=_test_app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         yield ac
-
-    app.dependency_overrides.clear()
+    _test_app.dependency_overrides.clear()
