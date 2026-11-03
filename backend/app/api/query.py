@@ -5,6 +5,8 @@ import re
 import time
 from typing import List, Optional, Set
 
+from app.config import settings
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,6 +30,80 @@ from app.knowledge.schemas import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/query", tags=["Query"])
+
+
+def _llm_available() -> bool:
+    """Return True if an OpenAI-compatible API key is configured."""
+    return bool(settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip())
+
+
+async def _generate_llm_answer(
+    question: str,
+    claims: List,
+    conflicts: List,
+    evidence_items: List,
+) -> Optional[str]:
+    """
+    Call OpenAI-compatible LLM to produce a natural-language answer grounded
+    in the structured facts already retrieved.  Returns None on any error so
+    the caller can fall back to the deterministic template.
+    """
+    if not _llm_available():
+        return None
+    try:
+        from openai import AsyncOpenAI  # type: ignore
+        client = AsyncOpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            base_url=settings.OPENAI_BASE_URL,
+        )
+        # Build a compact evidence block – no fabrication possible because
+        # the LLM only sees pre-extracted, verified facts.
+        facts_block = "\n".join(
+            f"- {c.entity_name}: {c.predicate.replace('_', ' ')} = {c.value} {c.unit or ''} "
+            f"[status: {c.status}, source: {c.source_doc or 'unknown'}]"
+            for c in claims
+        )
+        conflict_block = "\n".join(
+            f"- CONFLICT on {c.predicate}: {c.description}"
+            for c in conflicts
+        )
+        snippet_block = "\n".join(
+            f"- [{e.document_name or 'doc'} p.{e.page_number or '?'}]: {e.snippet[:120]}"
+            for e in evidence_items[:4]
+        )
+
+        system_prompt = (
+            "You are the Aegis Knowledge System — a precise technical assistant for the "
+            "Aegis Series-7 Hydraulic Control System.\n"
+            "Rules:\n"
+            "1. Answer ONLY from the structured facts and evidence provided below.\n"
+            "2. If facts conflict, clearly state all conflicting values and their sources.\n"
+            "3. Never invent specifications, part numbers, or page references.\n"
+            "4. If evidence is insufficient, say so explicitly.\n"
+            "5. Be concise and technical."
+        )
+
+        user_prompt = (
+            f"Question: {question}\n\n"
+            f"Extracted Facts:\n{facts_block or 'None found.'}\n\n"
+            f"Conflicts:\n{conflict_block or 'None.'}\n\n"
+            f"Supporting Passages:\n{snippet_block or 'None.'}\n\n"
+            "Answer (grounded in the above evidence only):"
+        )
+
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            max_tokens=512,
+            temperature=0.1,  # Low temperature for factual consistency
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        logger.warning("LLM call failed, falling back to deterministic answer: %s", exc)
+        return None
 
 # Common engineering query keywords mapped to predicates
 KEYWORD_TO_PREDICATE = {
@@ -212,7 +288,18 @@ async def query_knowledge(
 
     # 7. Synthesize Authoritative Grounded Answer
     answer_parts: List[str] = []
-    if claims:
+
+    # --- Try LLM-enhanced answer first (only when key is configured) ---
+    llm_answer = await _generate_llm_answer(
+        question=req.question,
+        claims=claims,
+        conflicts=conflicts_info,
+        evidence_items=evidence_items,
+    )
+
+    if llm_answer:
+        answer_text = llm_answer
+    elif claims:
         # Group claims by entity
         by_entity: dict = {}
         for cl in claims:
@@ -242,7 +329,8 @@ async def query_knowledge(
             f"for '{req.question}'. Please ensure the relevant technical documents are ingested."
         )
 
-    answer_text = "\n".join(answer_parts)
+    if not llm_answer:
+        answer_text = "\n".join(answer_parts)
     elapsed_ms = round((time.time() - start_time) * 1000, 2)
     overall_confidence = 0.95 if claims and not conflicts_info else (0.80 if claims else 0.50)
 
