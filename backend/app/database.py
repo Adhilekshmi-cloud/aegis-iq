@@ -12,7 +12,7 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 logger = logging.getLogger(__name__)
-
+logger.info("Database URL in use: %s", settings.DATABASE_URL)
 # Create asynchronous engine
 engine = create_async_engine(
     settings.DATABASE_URL,
