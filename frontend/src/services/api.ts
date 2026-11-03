@@ -1,5 +1,7 @@
 /* API client for Aegis Knowledge System backend */
 
+// In development, Vite proxies '/api' to 'http://localhost:8000'.
+// Using relative '/api' avoids CORS issues and port mismatches.
 const API_BASE = '/api';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -11,7 +13,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     const err = await res.text().catch(() => 'Unknown error');
     throw new Error(`API error ${res.status}: ${err}`);
   }
-  return res.json();
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return res.json();
+  }
+  const text = await res.text();
+  return (text ? JSON.parse(text) : {}) as T;
 }
 
 export const api = {
