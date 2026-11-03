@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageCircle, Database, Network, ClipboardCheck, Shield } from 'lucide-react'
+import { LayoutDashboard, MessageCircle, Database, Network, ClipboardCheck, Shield, FileDown } from 'lucide-react'
 import { ReactNode } from 'react'
 
 const navItems = [
@@ -49,6 +49,18 @@ export default function Layout({ children }: { children: ReactNode }) {
               <span>{label}</span>
             </NavLink>
           ))}
+
+          {/* Export / Download PDF Documentation */}
+          <div className="pt-4 mt-4 border-t border-aegis-border/50">
+            <a
+              href="/Aegis_Intelligence_System_Documentation.pdf"
+              download="Aegis_Intelligence_System_Documentation.pdf"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-purple-300 hover:text-white bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 transition-all duration-200"
+            >
+              <FileDown className="w-4 h-4 text-purple-400 flex-shrink-0" />
+              <span>Export System Doc (PDF)</span>
+            </a>
+          </div>
         </nav>
 
         {/* Footer */}
