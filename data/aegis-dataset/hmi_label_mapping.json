@@ -1,0 +1,19 @@
+{
+  "document_type": "hmi_configuration",
+  "system": "Aegis Series-7",
+  "software_version": "HMI-SW-4.2.1",
+  "revision": "Rev B",
+  "effective_date": "2024-03-15",
+  "label_mappings": [
+    {"hmi_label": "ACT-PRI", "component_id": "PA-7100", "component_name": "Primary Actuator", "display_group": "Flight Control", "screen": "MAIN"},
+    {"hmi_label": "SRV-V1", "component_id": "SV-4200A", "component_name": "Servo Valve", "display_group": "Flight Control", "screen": "MAIN"},
+    {"hmi_label": "HX-MAIN", "component_id": "HX-3300", "component_name": "Heat Exchanger", "display_group": "Thermal", "screen": "THERMAL"},
+    {"hmi_label": "FLT-PRI", "component_id": "FLT-2100", "component_name": "Filter Assembly", "display_group": "Filtration", "screen": "MAINT"},
+    {"hmi_label": "PMP-1", "component_id": "PMP-5000", "component_name": "Primary Pump", "display_group": "Power", "screen": "MAIN"},
+    {"hmi_label": "ACC-1", "component_id": "ACC-1800", "component_name": "Accumulator", "display_group": "Power", "screen": "MAIN"},
+    {"hmi_label": "RES-1", "component_id": "RES-0900", "component_name": "Reservoir", "display_group": "Fluid", "screen": "MAINT"},
+    {"hmi_label": "PRV-SYS", "component_id": "PRV-6600", "component_name": "Pressure Relief Valve", "display_group": "Safety", "screen": "SAFETY"},
+    {"hmi_label": "PRESS-SYS", "component_id": null, "component_name": "System Pressure", "display_group": "Overview", "screen": "MAIN"},
+    {"hmi_label": "TEMP-HYD", "component_id": null, "component_name": "Hydraulic Fluid Temperature", "display_group": "Overview", "screen": "MAIN"}
+  ]
+}

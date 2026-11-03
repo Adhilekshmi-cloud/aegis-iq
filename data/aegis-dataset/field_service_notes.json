@@ -1,0 +1,34 @@
+{
+  "document_type": "field_service_notes",
+  "technician": "Mike Torres",
+  "aircraft_sn": "S7-1038",
+  "date": "2024-02-14",
+  "system": "Aegis Series-7 Hydraulic",
+  "notes": [
+    {
+      "component": "Primary Actuator",
+      "component_id": "PA-7100",
+      "observation": "System pressure gauge showing approximately 2800-3000 PSI during ground check. Seems lower than expected but within limits per OM-S7-001 Rev A. Need to verify if newer pressure spec applies to this S/N.",
+      "action": "Monitored pressure for 30 minutes, stable at 2950 PSI. Acceptable per current maintenance manual."
+    },
+    {
+      "component": "Servo Valve",
+      "component_id": "SV-4200",
+      "observation": "Noted slight delay in actuator response during functional check. Response time measured at approximately 10ms. The spec says 8ms max but the old SV-4200 valves are known to be slower. This aircraft hasn't been upgraded to SV-4200A yet.",
+      "action": "Logged discrepancy report DR-2024-0147. Recommended scheduling SV-4200A upgrade per ECN-2847 at next depot visit."
+    },
+    {
+      "component": "Heat Exchanger",
+      "hmi_label": "HX-MAIN",
+      "observation": "Fluid temp running a bit warm after extended ground ops, saw about 95°C on the HMI display. The heat exchanger (HX-3300) seems to be working but ground cooling is always worse than in flight.",
+      "action": "No action required. Temperature within limits. Noted for trend monitoring."
+    },
+    {
+      "component": "Filter Assembly",
+      "component_id": "FLT-2100",
+      "observation": "Bypass indicator popped during engine start. Cleared after warmup. Probably just cold fluid viscosity issue - it was about -15°C ambient.",
+      "action": "Replaced filter element as precautionary measure. New element P/N FE-2100-10A installed. Reset bypass indicator."
+    }
+  ],
+  "general_remarks": "Overall system in good condition for an aircraft with 3,200 flight hours. The main hydraulic ram (that's what the old-timers call the PA-7100) is still performing well. Recommend upgrading servo valve at next opportunity."
+}

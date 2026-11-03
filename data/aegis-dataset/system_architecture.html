@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Series-7 Hydraulic Control System - System Architecture Guide</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 40px; color: #2d3748; background-color: #f7fafc; }
+        .container { max-width: 1000px; margin: auto; background: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .doc-header { border-bottom: 3px solid #2b6cb0; padding-bottom: 20px; margin-bottom: 30px; }
+        .metadata-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #edf2f7; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        h1 { color: #1a365d; margin-top: 0; font-size: 2em; }
+        h2 { color: #2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #2d3748; margin-top: 20px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #cbd5e0; padding: 10px 14px; text-align: left; }
+        th { background-color: #ebf8ff; color: #2c5282; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .callout-info { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+        .callout-note { background-color: #fefcbf; border-left: 4px solid #d69e2e; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; background: #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="doc-header">
+        <h1>Aegis Series-7 Hydraulic Control System</h1>
+        <h3>System Architecture Guide</h3>
+        <div class="metadata-grid">
+            <div><strong>Document ID:</strong> ARCH-S7-001</div>
+            <div><strong>System Designation:</strong> Aegis Series-7 (S7)</div>
+            <div><strong>Revision:</strong> Rev B</div>
+            <div><strong>Effective Date:</strong> 2024-03-15</div>
+            <div><strong>Classification:</strong> Proprietary Technical Reference</div>
+            <div><strong>Distribution:</strong> Engineering, Maintenance, Field Operations</div>
+        </div>
+    </div>
+
+    <h2>1. System Overview</h2>
+    <p>
+        The Aegis Series-7 is a 3000 PSI class dual-redundant hydraulic flight control system designed for high-performance aerodynamic surface positioning and flight control stabilization. The system provides continuous hydraulic power to flight-critical actuators under dynamic aerodynamic load regimes while maintaining stringent fault-tolerant isolation across power channels.
+    </p>
+
+    <h2>2. System Architecture & Redundancy</h2>
+    <p>
+        The architecture employs a fully segregated, symmetrical dual-channel configuration comprising a <strong>Left Hydraulic Channel</strong> and a <strong>Right Hydraulic Channel</strong>. Each channel maintains dedicated mechanical power takeoff, fluid storage, conditioning, and distribution circuits:
+    </p>
+    <ul>
+        <li><strong>Left Hydraulic Channel:</strong> Powered by Primary Engine Drive #1 via pump PMP-5000 (Left), feeding the left manifold and primary actuator channel A.</li>
+        <li><strong>Right Hydraulic Channel:</strong> Powered by Primary Engine Drive #2 via pump PMP-5000 (Right), feeding the right manifold and primary actuator channel B.</li>
+        <li><strong>Redundancy & Automatic Failover:</strong> Dual-channel with automatic failover, each channel independently powers flight control surfaces. In the event of channel depressurization, hydraulic isolation valves isolate the degraded branch in less than 15 milliseconds, transferring full authority to the active channel without loss of flight surface stiffness or transient disturbance.</li>
+    </ul>
+
+    <h2>3. Hydraulic Fluid & Thermal Operating Parameters</h2>
+    <p>
+        The Series-7 system is standardized on modern high-temperature synthetic fluid to prevent flash ignition and fluid degradation under extreme duty cycles.
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Specification Value</th>
+                <th>Standard / Reference</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Hydraulic Fluid Type</td>
+                <td>MIL-PRF-83282 polyol ester synthetic fluid</td>
+                <td>Fire-resistant, synthetic hydrocarbon/polyol ester base</td>
+            </tr>
+            <tr>
+                <td>Fluid Operating Temperature Range</td>
+                <td>-40°C to 204°C</td>
+                <td>Continuous operational flight envelope</td>
+            </tr>
+            <tr>
+                <td>Thermal Conditioning</td>
+                <td>Regulated by fuel-cooled heat exchanger (HX-3300)</td>
+                <td>Max continuous heat rejection 12 kW</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. System Operating Pressure Specifications</h2>
+    <p>
+        The nominal structural pressure ratings for the Aegis Series-7 hydraulic circuits are defined below:
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Rating Level</th>
+                <th>Pressure (PSI)</th>
+                <th>Engineering Definition</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Nominal Operating Pressure</td>
+                <td>3000 PSI</td>
+                <td>Baseline system operating pressure across main distribution manifolds</td>
+            </tr>
+            <tr>
+                <td>Proof Pressure</td>
+                <td>3750 PSI</td>
+                <td>Proof test factor of 1.25x nominal without permanent structural deformation</td>
+            </tr>
+            <tr>
+                <td>Burst Pressure</td>
+                <td>4500 PSI</td>
+                <td>Burst test factor of 1.50x nominal without rupture or pressure loss</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout-note">
+        <strong>Legacy Nomenclature Note:</strong><br>
+        The Primary Actuator (also referred to as the Main Hydraulic Ram in legacy documentation) is designated PA-7100.
+    </div>
+
+    <h2>5. Component Hierarchy Mapping</h2>
+    <p>
+        The following table delineates the hierarchical breakdown of the Aegis Series-7 hydraulic control system from system-level down to individual line replaceable components.
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>System</th>
+                <th>Subsystem</th>
+                <th>Component Name</th>
+                <th>Component ID</th>
+                <th>Function</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Flight Control</td>
+                <td>Primary Actuator</td>
+                <td>PA-7100</td>
+                <td>Dual-tandem hydraulic ram for flight control surface positioning</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Flight Control</td>
+                <td>Servo Valve</td>
+                <td>SV-4200</td>
+                <td>Two-stage electrohydraulic flow control valve modulating actuator fluid</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Power Generation</td>
+                <td>Primary Hydraulic Pump</td>
+                <td>PMP-5000</td>
+                <td>Engine-driven variable displacement axial piston pump (28.5 cc/rev)</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Energy Storage</td>
+                <td>Hydraulic Accumulator</td>
+                <td>ACC-1800</td>
+                <td>Bladder-type nitrogen precharged damper (1500 PSI at 20°C)</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Filtration</td>
+                <td>Main Filter Assembly</td>
+                <td>FLT-2100</td>
+                <td>10-micron absolute pressure-line filter with 75 PSI bypass switch</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Thermal Management</td>
+                <td>Heat Exchanger</td>
+                <td>HX-3300</td>
+                <td>Hydraulic-to-fuel counter-flow core heat exchanger (12 kW rejection)</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Fluid Storage</td>
+                <td>Hydraulic Reservoir</td>
+                <td>RES-0900</td>
+                <td>Pressurized bootstrap fluid reservoir with integrated volume sensor</td>
+            </tr>
+            <tr>
+                <td>Aegis Series-7</td>
+                <td>Safety</td>
+                <td>Pressure Relief Valve</td>
+                <td>PRV-6600</td>
+                <td>Direct-acting overpressure cracking valve protecting distribution lines</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>6. Key Component Architecture Descriptions</h2>
+    <div class="callout-info">
+        <h3>PA-7100 Primary Actuator</h3>
+        <p>
+            The Primary Actuator PA-7100 serves as the direct mechanical interface to the primary aerodynamic control surfaces. Built from forged Titanium Ti-6Al-4V, it utilizes dual tandem hydraulic cylinders powered by independent channel lines to guarantee full mechanical authority upon single-channel depressurization.
+        </p>
+    </div>
+
+    <div class="callout-info">
+        <h3>SV-4200 Electrohydraulic Servo Valve</h3>
+        <p>
+            The SV-4200 electrohydraulic servo valve regulates high-pressure fluid directly into the PA-7100 chambers. Operating on pilot stage torque-motor deflection, it features precision-machined 17-4PH stainless steel spool sleeves rated for 15 GPM nominal flow with an 8 ms step response.
+        </p>
+    </div>
+
+    <div class="callout-info">
+        <h3>PMP-5000 Primary Hydraulic Pump</h3>
+        <p>
+            The PMP-5000 is an engine-driven variable displacement pump constructed with Inconel 718 rotating groups. It self-regulates displacement up to 28.5 cc/rev to maintain nominal circuit pressure across speed variations between 800 and 4200 RPM.
+        </p>
+    </div>
+
+    <div class="callout-info">
+        <h3>ACC-1800 Hydraulic Accumulator & Conditioning</h3>
+        <p>
+            Pulsation damping and emergency transient reserve are provided by the ACC-1800 bladder accumulator, precharged with dry nitrogen to 1500 PSI at 20°C. Downstream fluid clarity is secured via the FLT-2100 10-micron filter assembly with mechanical bypass activation at 75 PSI differential.
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

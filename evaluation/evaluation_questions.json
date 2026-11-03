@@ -1,0 +1,122 @@
+[
+  {
+    "id": "Q01",
+    "question": "What is the nominal operating pressure of the Aegis Series-7 hydraulic system?",
+    "expected_answer": "The operating pressure is subject to a revision-dependent conflict. Rev A specifies 3000 PSI, while ECN-2847 (Rev B, effective S/N 1042+) revises it to 3200 PSI.",
+    "expected_behavior": "conflict_detection",
+    "requires_conflict_handling": true,
+    "relevant_documents": ["component_specifications.xlsx", "system_architecture.html", "engineering_change_notice_ECN_2847.docx", "training_presentation.pptx"]
+  },
+  {
+    "id": "Q02",
+    "question": "What is the part number for the servo valve used in the Aegis Series-7?",
+    "expected_answer": "The original servo valve is SV-4200. Per ECN-2847, it was replaced by SV-4200A for Rev B (S/N 1042 and subsequent).",
+    "expected_behavior": "version_awareness",
+    "requires_conflict_handling": true,
+    "relevant_documents": ["component_specifications.xlsx", "engineering_change_notice_ECN_2847.docx", "field_service_notes.json"]
+  },
+  {
+    "id": "Q03",
+    "question": "What are all the known names and identifiers for the Primary Actuator?",
+    "expected_answer": "The Primary Actuator is identified as: PA-7100 (component ID), Primary Actuator (official name), Main Hydraulic Ram (legacy name used by field technicians), ACT-PRI (HMI display label).",
+    "expected_behavior": "alias_resolution",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx", "hmi_label_mapping.json", "field_service_notes.json", "system_architecture.html"]
+  },
+  {
+    "id": "Q04",
+    "question": "What changes were introduced by Engineering Change Notice ECN-2847?",
+    "expected_answer": "ECN-2847 introduced three changes effective Rev B (S/N 1042+): 1) Servo valve upgrade from SV-4200 to SV-4200A with improved flow rate (18 GPM) and response time (6ms), 2) Operating pressure increase from 3000 to 3200 PSI with corresponding proof/burst pressure increases, 3) Accumulator precharge increase from 1500 to 1600 PSI.",
+    "expected_behavior": "direct_extraction",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["engineering_change_notice_ECN_2847.docx"]
+  },
+  {
+    "id": "Q05",
+    "question": "What is the MTBF of the filtration module?",
+    "expected_answer": "The MTBF of the filtration module cannot be determined from the available documents. No document provides mean time between failures data for the FLT-2100 filter assembly.",
+    "expected_behavior": "appropriate_abstention",
+    "requires_conflict_handling": false,
+    "relevant_documents": []
+  },
+  {
+    "id": "Q06",
+    "question": "What hydraulic fluid does the Aegis Series-7 use?",
+    "expected_answer": "The Aegis Series-7 uses MIL-PRF-83282 polyol ester synthetic hydraulic fluid, with an operating temperature range of -40°C to 204°C.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["system_architecture.html", "training_presentation.pptx"]
+  },
+  {
+    "id": "Q07",
+    "question": "What is the operating temperature range of the Primary Actuator?",
+    "expected_answer": "The component specifications indicate an operating temperature range of -40°C to +85°C for the PA-7100 Primary Actuator.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx", "training_presentation.pptx"]
+  },
+  {
+    "id": "Q08",
+    "question": "Is the Aegis Series-7 compatible with the Series-5?",
+    "expected_answer": "The available documents do not specify direct compatibility between the Series-7 and Series-5 systems. They use different hydraulic fluids (MIL-PRF-83282 vs MIL-H-5606), different operating pressures (3000/3200 PSI vs 2500 PSI), and different component part numbers. The Series-5 documentation is marked as superseded.",
+    "expected_behavior": "noise_filtering_and_inference",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["legacy_s5_manual_excerpt.html", "system_architecture.html"]
+  },
+  {
+    "id": "Q09",
+    "question": "What is the servo valve response time specification?",
+    "expected_answer": "The response time specification depends on the valve version. SV-4200 (Rev A): 8ms per component specs (max 12ms). SV-4200A (Rev B per ECN-2847): 6ms. Field measurements on SV-4200 units have shown approximately 10ms.",
+    "expected_behavior": "version_and_conflict_handling",
+    "requires_conflict_handling": true,
+    "relevant_documents": ["component_specifications.xlsx", "engineering_change_notice_ECN_2847.docx", "field_service_notes.json", "quality_inspection_report.xlsx"]
+  },
+  {
+    "id": "Q10",
+    "question": "What maintenance interval is specified for the servo valve?",
+    "expected_answer": "The servo valve (SV-4200/SV-4200A) has a maintenance interval of 1000 flight hours for flow test and null adjustment, per procedure MP-4200-01.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx", "training_presentation.pptx"]
+  },
+  {
+    "id": "Q11",
+    "question": "What is the filter bypass differential pressure?",
+    "expected_answer": "The FLT-2100 filter assembly bypass activates at 75 PSI differential pressure, with a specification range of 70-80 PSI.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx", "quality_inspection_report.xlsx"]
+  },
+  {
+    "id": "Q12",
+    "question": "What is the accumulator precharge pressure?",
+    "expected_answer": "The accumulator precharge pressure depends on the revision. Rev A: 1500 PSI at 20°C. Rev B (per ECN-2847, S/N 1042+): 1600 PSI at 20°C.",
+    "expected_behavior": "version_awareness",
+    "requires_conflict_handling": true,
+    "relevant_documents": ["component_specifications.xlsx", "engineering_change_notice_ECN_2847.docx", "quality_inspection_report.xlsx"]
+  },
+  {
+    "id": "Q13",
+    "question": "What material is the Primary Actuator made from?",
+    "expected_answer": "The PA-7100 Primary Actuator is manufactured from Titanium Ti-6Al-4V.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx"]
+  },
+  {
+    "id": "Q14",
+    "question": "What redundancy does the Aegis Series-7 provide?",
+    "expected_answer": "The Aegis Series-7 features dual-channel redundancy with automatic failover. Left and Right independent hydraulic channels each independently power flight control surfaces.",
+    "expected_behavior": "direct_lookup",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["system_architecture.html"]
+  },
+  {
+    "id": "Q15",
+    "question": "What is the pump displacement of the PMP-5000?",
+    "expected_answer": "The PMP-5000 Primary Hydraulic Pump has a nominal displacement of 28.5 cc/rev per the component specifications. QA inspection measured 28.3 cc/rev within specification range (27-30 cc/rev).",
+    "expected_behavior": "multi_source_synthesis",
+    "requires_conflict_handling": false,
+    "relevant_documents": ["component_specifications.xlsx", "quality_inspection_report.xlsx"]
+  }
+]

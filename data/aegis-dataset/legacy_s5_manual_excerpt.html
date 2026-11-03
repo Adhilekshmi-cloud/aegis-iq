@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Series-5 Hydraulic System - Operator Reference (LEGACY)</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; color: #333; }
+        .superseded-banner { background-color: #ffcccc; border: 3px solid #cc0000; color: #990000; padding: 15px; font-weight: bold; text-align: center; font-size: 1.3em; margin-bottom: 25px; }
+        .metadata-box { background-color: #f4f4f4; border-left: 4px solid #555; padding: 10px 15px; margin-bottom: 20px; font-size: 0.9em; }
+        h1, h2, h3 { color: #222; }
+        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+        th { background-color: #eaeaea; }
+        .warning { background-color: #fff3cd; border-left: 4px solid #ffeeba; padding: 10px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div class="superseded-banner">
+    *** THIS DOCUMENT IS SUPERSEDED. FOR SERIES-7, REFER TO OM-S7-001 ***
+</div>
+
+<h1>Aegis Series-5 Hydraulic System - Operator Reference Manual (ARCHIVAL)</h1>
+
+<div class="metadata-box">
+    <strong>Document ID:</strong> OM-S5-001<br>
+    <strong>Revision:</strong> Rev F (Archival Copy)<br>
+    <strong>Publication Date:</strong> 2019-08-20<br>
+    <strong>Lifecycle Status:</strong> OBSOLETE / SUPERSEDED - NOT FOR OPERATIONAL USE ON SERIES-7 AIRCRAFT
+</div>
+
+<div class="warning">
+    <strong>CRITICAL NOTICE:</strong> This manual describes legacy Series-5 hydraulic equipment. Series-5 hydraulic systems and sub-components are fundamentally incompatible with Series-7 architectures. Do not cross-reference pressure specifications, filtration consumables, or hydraulic fluids between Series-5 and Series-7.
+</div>
+
+<h2>1. System Architecture Overview (Series-5)</h2>
+<p>
+The Aegis Series-5 Hydraulic Power System is a centralized, single-channel hydraulic network engineered for utility actuation and mechanical primary flight surfaces. Unlike subsequent dual-redundant designs, the Series-5 operates with a single continuous pressure distribution line supplemented by a passive emergency blow-down reserve.
+</p>
+
+<h2>2. Fluid and Operating Parameters</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Specification Value</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Hydraulic Fluid Type</td>
+            <td>MIL-H-5606 Mineral-based hydraulic fluid</td>
+            <td>FLAMMABLE. Incompatible with polyol ester fluids (MIL-PRF-83282). Mixing causes elastomer swell and seal destruction.</td>
+        </tr>
+        <tr>
+            <td>Nominal Operating Pressure</td>
+            <td>2500 PSI</td>
+            <td>Regulated via mechanical unloader valve. Maximum transient overshoot 2750 PSI.</td>
+        </tr>
+        <tr>
+            <td>Proof Pressure</td>
+            <td>3125 PSI</td>
+            <td>1.25x design limit</td>
+        </tr>
+        <tr>
+            <td>Burst Pressure</td>
+            <td>3750 PSI</td>
+            <td>1.50x design limit</td>
+        </tr>
+        <tr>
+            <td>System Architecture</td>
+            <td>Single-channel simplex</td>
+            <td>Zero automated cross-channel failover; manual emergency gear release only</td>
+        </tr>
+        <tr>
+            <td>Nominal Flow Rate</td>
+            <td>10.5 GPM</td>
+            <td>Single engine accessory drive gearbox pump</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>3. Legacy Component Designations</h2>
+<p>The following line replaceable units (LRUs) are specific to the Series-5 architecture:</p>
+<ul>
+    <li><strong>PA-5100 Actuator:</strong> Simplex linear actuator with internal mechanical locking mechanism. Operates strictly at 2500 PSI nominal pressure.</li>
+    <li><strong>SV-3100 Servo Valve:</strong> Single-coil flapper-nozzle electrohydraulic valve. Max rated flow 10 GPM at 1000 PSI drop.</li>
+    <li><strong>PMP-3500 Pump:</strong> Fixed-displacement axial piston pump rated for 2500 PSI continuous output.</li>
+    <li><strong>FLT-1200 Filter:</strong> 15-micron cellulose disposable filter cartridge.</li>
+</ul>
+
+<h2>4. Decommissioning & Transition Note</h2>
+<p>
+All airframes transitioned to the Series-7 architecture (S/N 1001 and higher) utilize dual-channel redundancy, MIL-PRF-83282 synthetic fluid, and 3000+ PSI pressure levels. Series-5 parts (PA-5100, SV-3100, PMP-3500) must never be installed on Series-7 aircraft.
+</p>
+
+</body>
+</html>
