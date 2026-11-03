@@ -10,12 +10,10 @@ from app.database import get_db
 from app.knowledge.models import (
     EntityType,
     ExtractionStatus,
-    ResolutionMethod,
     ResolutionStatus,
     VerificationStatus,
 )
 from app.knowledge.repository import (
-    ChunkRepository,
     ConflictRepository,
     DocumentRepository,
     EntityRepository,
@@ -42,13 +40,23 @@ router = APIRouter(prefix="/api", tags=["Knowledge Browsing"])
 
 @router.get("/entities", response_model=List[EntityResponse])
 async def list_entities(
-    query: Optional[str] = Query(None, description="Search term for entity canonical name or alias"),
-    entity_type: Optional[EntityType] = Query(None, description="Filter by entity type"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    query: Optional[str] = Query(default=None, description="Search term for entity canonical name or alias"),
+    entity_type: Optional[EntityType] = Query(default=None, description="Filter by entity type"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
     session: AsyncSession = Depends(get_db),
 ) -> List[EntityResponse]:
     """List knowledge entities with alias mappings, supporting text search and type filtering."""
+    # Ensure parameter defaults are unwrapped if invoked directly
+    if not isinstance(skip, int):
+        skip = 0
+    if not isinstance(limit, int):
+        limit = 100
+    if not isinstance(query, str):
+        query = None
+    if not isinstance(entity_type, EntityType):
+        entity_type = None
+
     entity_repo = EntityRepository(session)
     if query:
         entities = await entity_repo.search(query=query, limit=limit)
@@ -79,14 +87,25 @@ async def get_entity_detail(
 
 @router.get("/facts", response_model=List[FactResponse])
 async def list_facts(
-    entity_id: Optional[str] = Query(None, description="Filter by associated entity ID"),
-    predicate: Optional[str] = Query(None, description="Filter by predicate name"),
-    status: Optional[VerificationStatus] = Query(None, description="Filter by verification status"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    entity_id: Optional[str] = Query(default=None, description="Filter by associated entity ID"),
+    predicate: Optional[str] = Query(default=None, description="Filter by predicate name"),
+    status: Optional[VerificationStatus] = Query(default=None, description="Filter by verification status"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
     session: AsyncSession = Depends(get_db),
 ) -> List[FactResponse]:
     """List extracted facts with optional filtering by entity, predicate, or verification status."""
+    if not isinstance(skip, int):
+        skip = 0
+    if not isinstance(limit, int):
+        limit = 100
+    if not isinstance(entity_id, str):
+        entity_id = None
+    if not isinstance(predicate, str):
+        predicate = None
+    if not isinstance(status, VerificationStatus):
+        status = None
+
     fact_repo = FactRepository(session)
     facts = await fact_repo.get_all(
         skip=skip,
@@ -120,12 +139,19 @@ async def get_fact_detail(
 
 @router.get("/conflicts", response_model=List[ConflictResponse])
 async def list_conflicts(
-    status: Optional[ResolutionStatus] = Query(None, description="Filter by resolution status"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    status: Optional[ResolutionStatus] = Query(default=None, description="Filter by resolution status"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
     session: AsyncSession = Depends(get_db),
 ) -> List[ConflictResponse]:
     """List all detected engineering conflicts across facts and revisions."""
+    if not isinstance(skip, int):
+        skip = 0
+    if not isinstance(limit, int):
+        limit = 100
+    if not isinstance(status, ResolutionStatus):
+        status = None
+
     conflict_repo = ConflictRepository(session)
     conflicts = await conflict_repo.get_all(skip=skip, limit=limit, status=status)
     return [ConflictResponse.model_validate(c) for c in conflicts]
@@ -176,12 +202,19 @@ async def resolve_conflict(
 
 @router.get("/documents", response_model=List[DocumentResponse])
 async def list_documents(
-    status: Optional[ExtractionStatus] = Query(None, description="Filter by ingestion extraction status"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    status: Optional[ExtractionStatus] = Query(default=None, description="Filter by ingestion extraction status"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
     session: AsyncSession = Depends(get_db),
 ) -> List[DocumentResponse]:
     """List all ingested technical documents and their processing status."""
+    if not isinstance(skip, int):
+        skip = 0
+    if not isinstance(limit, int):
+        limit = 100
+    if not isinstance(status, ExtractionStatus):
+        status = None
+
     doc_repo = DocumentRepository(session)
     docs = await doc_repo.get_all(skip=skip, limit=limit, status=status)
     return [DocumentResponse.model_validate(d) for d in docs]

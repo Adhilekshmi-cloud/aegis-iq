@@ -630,16 +630,15 @@ class ConflictRepository:
         self.session.add(conflict)
         await self.session.flush()
 
-        # Link related facts
+        # Link related facts directly via association table insert to prevent async lazy loading issues
         fact_ids = data.get("fact_ids", [])
         if fact_ids:
-            facts_stmt = select(Fact).where(Fact.fact_id.in_(fact_ids))
-            facts_result = await self.session.execute(facts_stmt)
-            facts = list(facts_result.scalars().all())
-            conflict.facts.extend(facts)
+            from app.knowledge.models import conflict_facts
+            from sqlalchemy import insert
+            for fid in fact_ids:
+                stmt = insert(conflict_facts).values(conflict_id=conflict.conflict_id, fact_id=fid)
+                await self.session.execute(stmt)
             await self.session.flush()
-
-        await self.session.refresh(conflict)
         logger.warning(
             "Created conflict: %s on predicate '%s' (id: %s)",
             conflict.conflict_type,

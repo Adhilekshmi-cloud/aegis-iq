@@ -1,3 +1,5 @@
+"""Database session and connection management for Aegis Knowledge System."""
+
 from pathlib import Path
 
 from sqlalchemy import MetaData
@@ -37,6 +39,8 @@ AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    autoflush=False,
+    autocommit=False,
 )
 
 
@@ -55,6 +59,11 @@ async def close_db() -> None:
 
 
 async def get_db():
-    """Yield an async database session for a request."""
+    """Yield an async database session for a request and commit automatically."""
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
