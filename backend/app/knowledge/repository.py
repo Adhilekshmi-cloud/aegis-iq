@@ -218,18 +218,21 @@ class ChunkRepository:
         return list(result.scalars().all())
 
     async def search_text(self, query: str, limit: int = 10) -> List[DocumentChunk]:
-        """Perform substring search across chunk contents."""
-        term = f"%{query.strip()}%"
-        stmt = (
-            select(DocumentChunk)
-            .where(
-                or_(
-                    DocumentChunk.content.ilike(term),
-                    DocumentChunk.section_header.ilike(term),
-                )
-            )
-            .limit(limit)
-        )
+        """Perform multi-keyword substring search across chunk contents."""
+        raw_words = [w.strip() for w in query.replace('?', ' ').replace('-', ' ').split() if len(w.strip()) > 3]
+        stopwords = {'what', 'when', 'which', 'where', 'under', 'does', 'with', 'from', 'have', 'that', 'this', 'specified', 'system'}
+        keywords = [w for w in raw_words if w.lower() not in stopwords]
+        
+        if not keywords:
+            keywords = raw_words or [query.strip()]
+
+        conditions = []
+        for kw in keywords[:4]:
+            term = f"%{kw}%"
+            conditions.append(DocumentChunk.content.ilike(term))
+            conditions.append(DocumentChunk.section_header.ilike(term))
+
+        stmt = select(DocumentChunk).where(or_(*conditions)).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
